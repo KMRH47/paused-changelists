@@ -1,0 +1,32 @@
+<idea-plugin>
+  <id>dev.togglepaused.paused-changelists</id>
+  <name>Paused Changelists</name>
+  <vendor email="noreply@example.com">TogglePaused</vendor>
+  <version>0.1.0</version>
+
+  <description>
+    Markér en changelist som [PAUSED]. Den forbliver synlig i Changes, men vises grå med pause-ikon. Tilføjer en toggle-action i højrekliksmenuen og som toolbar-knap.
+  </description>
+
+  <depends>com.intellij.modules.platform</depends>
+  <depends>com.intellij.modules.vcs</depends>
+
+  <actions>
+    <!-- Højreklik i Changes view -->
+    <action id="dev.togglepaused.TogglePauseChangelistAction"
+            class="dev.togglepaused.TogglePauseChangelistAction"
+            text="Toggle Pause Changelist"
+            description="Toggle [PAUSED] markering og visuel dekorering">
+      <add-to-group group-id="ChangesViewPopupMenu" anchor="last"/>
+      <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt P"/>
+    </action>
+
+    <!-- Toolbar knap i Commit tool window -->
+    <action id="dev.togglepaused.TogglePauseChangelistToolbar"
+            class="dev.togglepaused.TogglePauseChangelistAction"
+            text="Toggle Pause"
+            description="Toggle [PAUSED] for valgt changelist">
+      <add-to-group group-id="ChangesViewToolbar" anchor="last"/>
+    </action>
+  </actions>
+</idea-plugin>
