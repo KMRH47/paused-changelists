@@ -31,6 +31,10 @@ intellijPlatform {
         version.set(providers.gradleProperty("pluginVersion"))
         changeNotes.set(
             """
+            <h3>0.1.1</h3>
+            <ul>
+              <li>Fix: Correctly identify changelist when pausing files/folders instead of defaulting to "Changes" changelist</li>
+            </ul>
             <h3>0.1.0</h3>
             <ul>
               <li>Initial release</li>

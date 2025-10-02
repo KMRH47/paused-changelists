@@ -104,9 +104,22 @@ class TogglePauseChangelistAction : AnAction() {
     }
 
     private fun selectedChangeList(e: AnActionEvent, clm: ChangeListManager): LocalChangeList? {
+        // First, try to get the selected changelist directly
         val lists = e.getData(VcsDataKeys.CHANGE_LISTS)
         if (!lists.isNullOrEmpty()) return lists.firstOrNull() as? LocalChangeList
-        return clm.defaultChangeList
+        
+        // If no changelist is directly selected, try to get it from selected changes
+        val changes = e.getData(VcsDataKeys.CHANGES)
+        if (!changes.isNullOrEmpty()) {
+            val change = changes.firstOrNull()
+            if (change != null) {
+                // Find which changelist contains this change
+                return clm.getChangeList(change)
+            }
+        }
+        
+        // Last resort: return null to avoid accidentally modifying the default changelist
+        return null
     }
 
     override fun update(e: AnActionEvent) {
