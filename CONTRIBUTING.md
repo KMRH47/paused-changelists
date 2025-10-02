@@ -123,13 +123,23 @@ git push origin master
 git push origin v0.1.2
 ```
 
-### 4. GitHub Actions Workflow
+### 4. GitHub Actions Workflows
 
-Once the tag is pushed, the workflow will automatically:
+This project has two workflows:
+
+**CI Build** (`.github/workflows/build.yml`)
+- Triggers on: Push to `master` branch and Pull Requests
+- Actions: Builds the plugin and uploads artifacts
+- Does NOT publish or create releases
+
+**Release** (`.github/workflows/release.yml`)
+- Triggers on: Push of tags matching `v*`
+- Actions: Builds, publishes to JetBrains Marketplace, and creates GitHub release
+
+Once the tag is pushed, the Release workflow will automatically:
 - Build the plugin
-- Upload build artifacts
 - Publish to JetBrains Marketplace (requires `JETBRAINS_TOKEN` secret)
-- Create a GitHub release with the plugin ZIP
+- Create a GitHub release with the plugin ZIP and auto-generated release notes
 
 ## Development
 
