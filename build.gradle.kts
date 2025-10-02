@@ -45,9 +45,9 @@ intellijPlatform {
 
     publishing {
         token.set(providers.environmentVariable("JETBRAINS_TOKEN"))
-        channels.set(listOf(providers.gradleProperty("pluginVersion").map { version ->
-            if (version.contains("-beta") || version.contains("-rc")) "beta" else "default"
-        }))
+        channels.set(providers.gradleProperty("pluginVersion").map { version ->
+            listOf(if (version.contains("-beta") || version.contains("-rc")) "beta" else "default")
+        })
     }
 
     pluginVerification {
