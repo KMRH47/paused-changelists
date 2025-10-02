@@ -1,12 +1,27 @@
 <idea-plugin>
   <id>dev.togglepaused.paused-changelists</id>
   <name>Paused Changelists</name>
-  <vendor email="noreply@example.com">TogglePaused</vendor>
-  <version>0.1.0</version>
+  <vendor email="kmrh47@proton.me" url="https://github.com/KMRH47/paused-changelists">kmrh47</vendor>
 
-  <description>
-    Markér en changelist som [PAUSED]. Den forbliver synlig i Changes, men vises grå med pause-ikon. Tilføjer en toggle-action i højrekliksmenuen og som toolbar-knap.
-  </description>
+  <description><![CDATA[
+    <p>Pause changelists to keep them visible while shelving their changes.</p>
+
+    <h3>Features</h3>
+    <ul>
+      <li><strong>Toggle Pause:</strong> Right-click any changelist and select "Toggle Pause Changelist" or use Ctrl+Alt+P</li>
+      <li><strong>Visual Marker:</strong> Paused changelists are marked with [PAUSED] prefix</li>
+      <li><strong>Shelf Integration:</strong> Changes are shelved and reverted from working directory when paused</li>
+      <li><strong>Restore to Original:</strong> Changes are restored to the same changelist when unpaused</li>
+      <li><strong>No Disruption:</strong> Changelist remains visible in the Changes panel while paused</li>
+    </ul>
+
+    <h3>Usage</h3>
+    <ol>
+      <li>Right-click on any changelist → "Toggle Pause Changelist"</li>
+      <li>Changes are shelved and the changelist is renamed to [PAUSED] &lt;name&gt;</li>
+      <li>Toggle again to unshelve and restore changes to the original changelist</li>
+    </ol>
+  ]]></description>
 
   <depends>com.intellij.modules.platform</depends>
   <depends>com.intellij.modules.vcs</depends>

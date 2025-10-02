@@ -31,11 +31,32 @@ intellijPlatform {
         version.set(providers.gradleProperty("pluginVersion"))
         changeNotes.set(
             """
-            Initial release. Adds toggle to mark changelists as [PAUSED] and decorate them as grey with pause icon.
+            <h3>0.1.0</h3>
+            <ul>
+              <li>Initial release</li>
+              <li>Toggle pause/unpause changelists with Ctrl+Alt+P</li>
+              <li>Shelves changes while keeping changelist visible</li>
+              <li>Restores changes to original changelist when unpaused</li>
+              <li>Background thread processing to avoid EDT blocking</li>
+            </ul>
             """.trimIndent()
         )
+    }
+
+    publishing {
+        token.set(providers.environmentVariable("JETBRAINS_TOKEN"))
+        channels.set(listOf(providers.gradleProperty("pluginVersion").map { version ->
+            if (version.contains("-beta") || version.contains("-rc")) "beta" else "default"
+        }))
+    }
+
+    pluginVerification {
+        ides {
+            recommended()
+        }
     }
 }
 
 // kør lokalt: ./gradlew runIde
 // build ZIP: ./gradlew buildPlugin
+// publish: ./gradlew publishPlugin
