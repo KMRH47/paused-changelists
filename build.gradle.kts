@@ -29,8 +29,17 @@ kotlin {
 intellijPlatform {
     pluginConfiguration {
         version.set(providers.gradleProperty("pluginVersion"))
+        
+        ideaVersion {
+            sinceBuild.set("243")
+        }
+        
         changeNotes.set(
             """
+            <h3>0.1.2</h3>
+            <ul>
+              <li>Add IDE version compatibility declaration for marketplace</li>
+            </ul>
             <h3>0.1.1</h3>
             <ul>
               <li>Fix: Correctly identify changelist when pausing files/folders instead of defaulting to "Changes" changelist</li>
