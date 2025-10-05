@@ -67,39 +67,39 @@ class TogglePauseChangelistAction : AnAction() {
 
         // Find the corresponding shelf
         val shelfPrefix = "paused_${unpausedName}_"
-        val shelf = shelveManager.allLists.firstOrNull { it.description.startsWith(shelfPrefix) }
+        val shelf = shelveManager.allLists.firstOrNull { it.description.startsWith(shelfPrefix) } ?: return
 
-        if (shelf != null) {
-            // Run unshelving on background thread to avoid EDT blocking
-            ProgressManager.getInstance().runProcessWithProgressSynchronously({
-                // Get fresh reference to the renamed changelist
-                val targetList = clm.findChangeList(unpausedName)
-                if (targetList != null) {
-                    // Unshelve the changes
-                    shelveManager.unshelveChangeList(shelf, null, null, targetList, false)
+        // Run unshelving on background thread to avoid EDT blocking
+        ProgressManager.getInstance().runProcessWithProgressSynchronously({
+            // Get fresh reference to the renamed changelist
+            val targetList = clm.findChangeList(unpausedName) ?: return@runProcessWithProgressSynchronously
 
-                    // Move changes to the correct changelist if they didn't go there
-                    ApplicationManager.getApplication().invokeLater {
-                        val currentTargetList = clm.findChangeList(unpausedName)
-                        if (currentTargetList != null) {
-                            // Get all changes that might have gone to the wrong list
-                            val defaultList = clm.defaultChangeList
-                            val shelvedChanges = shelf.changes ?: emptyList()
-                            val changesToMove = defaultList.changes.filter { change ->
-                                // Check if this change was part of the unshelved changes
-                                shelvedChanges.any { shelvedChange ->
-                                    shelvedChange.afterPath == change.afterRevision?.file?.path
-                                }
-                            }
+            // Unshelve the changes
+            shelveManager.unshelveChangeList(shelf, null, null, targetList, false)
 
-                            // Move them to the target changelist
-                            if (changesToMove.isNotEmpty() && defaultList.id != currentTargetList.id) {
-                                clm.moveChangesTo(currentTargetList, *changesToMove.toTypedArray())
-                            }
-                        }
-                    }
-                }
-            }, "Unpausing Changelist...", false, project)
+            // Move changes to the correct changelist if they didn't go there
+            ApplicationManager.getApplication().invokeLater {
+                moveUnshelvedChangesToTarget(clm, shelf, unpausedName)
+            }
+        }, "Unpausing Changelist...", false, project)
+    }
+
+    private fun moveUnshelvedChangesToTarget(clm: ChangeListManager, shelf: com.intellij.openapi.vcs.changes.shelf.ShelvedChangeList, unpausedName: String) {
+        val currentTargetList = clm.findChangeList(unpausedName) ?: return
+        val defaultList = clm.defaultChangeList
+
+        if (defaultList.id == currentTargetList.id) return
+
+        val shelvedChanges = shelf.changes ?: emptyList()
+        val changesToMove = defaultList.changes.filter { change ->
+            // Check if this change was part of the unshelved changes
+            shelvedChanges.any { shelvedChange ->
+                shelvedChange.afterPath == change.afterRevision?.file?.path
+            }
+        }
+
+        if (changesToMove.isNotEmpty()) {
+            clm.moveChangesTo(currentTargetList, *changesToMove.toTypedArray())
         }
     }
 
@@ -107,19 +107,13 @@ class TogglePauseChangelistAction : AnAction() {
         // First, try to get the selected changelist directly
         val lists = e.getData(VcsDataKeys.CHANGE_LISTS)
         if (!lists.isNullOrEmpty()) return lists.firstOrNull() as? LocalChangeList
-        
+
         // If no changelist is directly selected, try to get it from selected changes
         val changes = e.getData(VcsDataKeys.CHANGES)
-        if (!changes.isNullOrEmpty()) {
-            val change = changes.firstOrNull()
-            if (change != null) {
-                // Find which changelist contains this change
-                return clm.getChangeList(change)
-            }
-        }
-        
-        // Last resort: return null to avoid accidentally modifying the default changelist
-        return null
+        val firstChange = changes?.firstOrNull() ?: return null
+
+        // Find which changelist contains this change
+        return clm.getChangeList(firstChange)
     }
 
     override fun update(e: AnActionEvent) {
