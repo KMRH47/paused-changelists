@@ -5,6 +5,7 @@ build/
 
 # IntelliJ Platform
 .intellijPlatform/
+.idea/
 
 # Backup files
 *.bak
