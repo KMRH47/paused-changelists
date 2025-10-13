@@ -62,44 +62,32 @@ class TogglePauseChangelistAction : AnAction() {
         val unpausedName = changelist.name.removePrefix(PAUSE_PREFIX)
         val changelistName = changelist.name
 
-        // First, rename back to unpaused
-        clm.editName(changelistName, unpausedName)
-
-        // Find the corresponding shelf
+        // Find the corresponding shelf before renaming
         val shelfPrefix = "paused_${unpausedName}_"
-        val shelf = shelveManager.allLists.firstOrNull { it.description.startsWith(shelfPrefix) } ?: return
+        val shelf = shelveManager.allLists.firstOrNull { it.description.startsWith(shelfPrefix) }
 
-        // Run unshelving on background thread to avoid EDT blocking
-        ProgressManager.getInstance().runProcessWithProgressSynchronously({
-            // Get fresh reference to the renamed changelist
-            val targetList = clm.findChangeList(unpausedName) ?: return@runProcessWithProgressSynchronously
+        if (shelf != null) {
+            // Run unshelving on background thread to avoid EDT blocking
+            ProgressManager.getInstance().runProcessWithProgressSynchronously({
+                // Get fresh reference to the changelist (still has PAUSED prefix at this point)
+                val targetList = clm.findChangeList(changelistName)
+                if (targetList != null) {
+                    // Unshelve the changes directly to the target changelist
+                    // The unshelveChangeList API will properly handle placing changes in the target list
+                    shelveManager.unshelveChangeList(shelf, null, null, targetList, false)
 
-            // Unshelve the changes
-            shelveManager.unshelveChangeList(shelf, null, null, targetList, false)
-
-            // Move changes to the correct changelist if they didn't go there
-            ApplicationManager.getApplication().invokeLater {
-                moveUnshelvedChangesToTarget(clm, shelf, unpausedName)
-            }
-        }, "Unpausing Changelist...", false, project)
-    }
-
-    private fun moveUnshelvedChangesToTarget(clm: ChangeListManager, shelf: com.intellij.openapi.vcs.changes.shelf.ShelvedChangeList, unpausedName: String) {
-        val currentTargetList = clm.findChangeList(unpausedName) ?: return
-        val defaultList = clm.defaultChangeList
-
-        if (defaultList.id == currentTargetList.id) return
-
-        val shelvedChanges = shelf.changes ?: emptyList()
-        val changesToMove = defaultList.changes.filter { change ->
-            // Check if this change was part of the unshelved changes
-            shelvedChanges.any { shelvedChange ->
-                shelvedChange.afterPath == change.afterRevision?.file?.path
-            }
-        }
-
-        if (changesToMove.isNotEmpty()) {
-            clm.moveChangesTo(currentTargetList, *changesToMove.toTypedArray())
+                    // Rename on EDT after unshelving completes
+                    ApplicationManager.getApplication().invokeLater {
+                        val pausedList = clm.findChangeList(changelistName)
+                        if (pausedList != null) {
+                            clm.editName(changelistName, unpausedName)
+                        }
+                    }
+                }
+            }, "Unpausing Changelist...", false, project)
+        } else {
+            // No shelf found, just rename back
+            clm.editName(changelistName, unpausedName)
         }
     }
 

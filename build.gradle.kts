@@ -36,6 +36,10 @@ intellijPlatform {
         
         changeNotes.set(
             """
+            <h3>0.1.3</h3>
+            <ul>
+              <li>Fix: Prevent irrelevant changes from being restored when unpausing</li>
+            </ul>
             <h3>0.1.2</h3>
             <ul>
               <li>Add IDE version compatibility declaration for marketplace</li>
