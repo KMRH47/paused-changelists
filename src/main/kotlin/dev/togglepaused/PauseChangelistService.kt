@@ -39,7 +39,10 @@ class PauseChangelistService {
         val unpausedName = changelistName.removePrefix(PAUSE_PREFIX)
         val shelfPrefix = "paused_${unpausedName}_"
 
-        return shelveManager.allLists.firstOrNull { it.description.startsWith(shelfPrefix) }
+        return shelveManager.allLists
+            .filter { it.description.startsWith(shelfPrefix) }
+            .sortedByDescending { it.description.substringAfterLast("_").toLongOrNull() ?: 0L }
+            .firstOrNull()
     }
 
     fun unpause(
