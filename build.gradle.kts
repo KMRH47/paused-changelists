@@ -19,11 +19,15 @@ dependencies {
         bundledModule("intellij.platform.vcs.impl")
         pluginVerifier()
         zipSigner()
+        testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
     }
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:5.7.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.1.0")
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(21)
 }
 
 intellijPlatform {
