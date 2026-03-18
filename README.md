@@ -22,4 +22,4 @@ IntelliJ IDEA 2024.3 or later
 
 ## License
 
-MIT
+PolyForm Noncommercial 1.0.0
